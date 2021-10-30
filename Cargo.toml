@@ -1,0 +1,15 @@
+[package]
+name = "ssg"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+home = "0.5.3"
+lazy_static = "1.4.0"
+pulldown-cmark = "0.8.0"
+regex = "1"
+serde = "1.0.130"
+serde_derive = "1.0.130"
+syntect = "4.6.0"
+time = { version = "0.3.3", features = ["formatting"] }
+toml = "0.5.8"
