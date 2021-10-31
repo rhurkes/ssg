@@ -38,7 +38,7 @@ pub fn convert(markdown: &str) -> Conversion {
     let mut footnotes: HashMap<String, String> = HashMap::new();
     let mut sidenote = String::new();
     let mut image_count = 0;
-    let word_count = WORD_REGEX.find_iter(&markdown).count();
+    let word_count = WORD_REGEX.find_iter(markdown).count();
 
     Parser::new_ext(markdown, *PARSER_OPTIONS).for_each(|event| match event {
         Event::Start(Tag::Heading(level)) => {
@@ -73,6 +73,14 @@ pub fn convert(markdown: &str) -> Conversion {
 
             code = String::new();
             in_code_block = None;
+        }
+        Event::Code(code) => {
+            if in_footnote.is_some() {
+                let html = format!("<code>{}</code>", code);
+                sidenote.push_str(&html);
+            } else {
+                events.push(Event::Code(code));
+            }
         }
         Event::Text(text) => {
             if in_code_block.is_some() {
@@ -112,19 +120,23 @@ pub fn convert(markdown: &str) -> Conversion {
             }
         }
         Event::End(Tag::Image(_, _, _)) => {}
-        Event::Start(Tag::Link(link_type, url, title)) => {
+        Event::Start(Tag::Link(_, url, _)) => {
+            let link = format!("<a href=\"{}\" target=\"_blank\">", url);
+
             if in_footnote.is_some() {
-                let link = format!("<a href=\"{}\" target=\"_blank\">", url);
                 sidenote.push_str(&link);
             } else {
-                events.push(Event::Start(Tag::Link(link_type, url, title)))
+                let html = CowStr::Boxed(link.into_boxed_str());
+                events.push(Event::Html(html));
             }
         }
-        Event::End(Tag::Link(link_type, url, title)) => {
+        Event::End(Tag::Link(_, _, _)) => {
             if in_footnote.is_some() {
                 sidenote.push_str("</a>");
             } else {
-                events.push(Event::End(Tag::Link(link_type, url, title)));
+                let link = "</a>".to_string();
+                let html = CowStr::Boxed(link.into_boxed_str());
+                events.push(Event::Html(html));
             }
         }
         event => {
@@ -148,5 +160,10 @@ pub fn convert(markdown: &str) -> Conversion {
         html = html.replace(&token, &sidenote);
     });
 
-    Conversion { html, image_count, title, word_count }
+    Conversion {
+        html,
+        image_count,
+        title,
+        word_count,
+    }
 }

@@ -6,6 +6,7 @@ pub struct Config {
     pub post_html_path: String,
     pub site_url: String,
     pub site_directory: String,
+    pub tag_html_path: String,
 }
 
 pub fn get_config() -> Config {
