@@ -9,6 +9,12 @@ mod writer;
 use config::{get_config, Config};
 use domain::{Content, File};
 use std::fs;
+use time::{format_description, format_description::FormatItem};
+
+lazy_static! {
+    static ref DATE_FORMAT: Vec<FormatItem<'static>> =
+        format_description::parse("[month repr:short] [day] [year]").unwrap();
+}
 
 fn main() {
     let config: Config = get_config();
@@ -50,13 +56,18 @@ fn get_posts(files: Vec<File>, post_html: &str) -> Vec<Content> {
         .iter()
         .map(|file| {
             let conversion = converter::convert(&file.markdown);
-            let html = post_html.replace("{{content}}", &conversion.html);
+            let created = file.created.format(&DATE_FORMAT).unwrap();
+
+            let html = post_html
+                .replace("{{content}}", &conversion.html)
+                .replace("{{date}}", &created)
+                .replace("{{title}}", &conversion.title);
 
             Content {
                 created: file.created.to_string(),
                 filename: file.filename.to_string(),
                 html,
-                title: conversion.title.to_string(),
+                title: conversion.title,
             }
         })
         .collect()
