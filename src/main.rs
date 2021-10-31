@@ -57,10 +57,12 @@ fn get_posts(files: Vec<File>, post_html: &str) -> Vec<Content> {
         .map(|file| {
             let conversion = converter::convert(&file.markdown);
             let created = file.created.format(&DATE_FORMAT).unwrap();
+            let read_time = get_read_time(conversion.image_count, conversion.word_count);
 
             let html = post_html
                 .replace("{{content}}", &conversion.html)
                 .replace("{{date}}", &created)
+                .replace("{{read_time}}", &read_time)
                 .replace("{{title}}", &conversion.title);
 
             Content {
@@ -71,4 +73,9 @@ fn get_posts(files: Vec<File>, post_html: &str) -> Vec<Content> {
             }
         })
         .collect()
+}
+
+fn get_read_time(image_count: usize, word_count: usize) -> String {
+    let minutes = (word_count / 265) + ((image_count * 11) / 60);
+    format!("{}m read time", minutes)
 }
