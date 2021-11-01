@@ -31,7 +31,7 @@ pub fn write_tag_pages(post_maps: &PostMaps, config: &Config, base_tag_html: &st
 
     let new_path = format!("{}{}.html", tags_directory, "all");
     let all_html = base_tag_html
-        .replace("{{title}}", "All posts")
+        .replace("{{title}}", "Posts tagged \"all\":")
         .replace("{{content}}", &all_html);
     fs::write(new_path, &all_html).expect("Unable to write file");
 
@@ -47,7 +47,7 @@ pub fn write_tag_pages(post_maps: &PostMaps, config: &Config, base_tag_html: &st
 
         let new_path = format!("{}{}.html", tags_directory, tag);
         let tag_html = base_tag_html
-            .replace("{{title}}", &format!("{} posts", tag))
+            .replace("{{title}}", &format!("Posts tagged \"{}\":", tag))
             .replace("{{content}}", &tag_html);
         fs::write(new_path, &tag_html).expect("Unable to write file");
     });

@@ -22,13 +22,14 @@ lazy_static! {
 fn main() {
     let config: Config = get_config();
     let post_html = fs::read_to_string(&config.post_html_path).expect("Error reading post html");
+    let tag_html = fs::read_to_string(&config.tag_html_path).expect("Error reading tag html");
     let input_path = format!("{}/_posts", &config.site_directory);
     let files = get_files(&input_path);
     let post_maps = get_post_maps(&files, &post_html, &config.site_url);
     let posts = get_posts_with_related(&post_maps, &config.site_url);
 
     writer::write_posts(posts, &config.site_directory);
-    writer::write_tag_pages(&post_maps, &config, &post_html);
+    writer::write_tag_pages(&post_maps, &config, &tag_html);
     writer::write_rss_feed(&post_maps, &config);
 }
 
